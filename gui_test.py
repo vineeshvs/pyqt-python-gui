@@ -15,6 +15,7 @@ last edited: October 2011
 import sys
 from PyQt4 import QtGui
 from PyQt4 import QtCore 
+from slicing import *
 
 class Communicate(QtCore.QObject):
     closeApp = QtCore.pyqtSignal() 
@@ -49,11 +50,9 @@ class Example(QtGui.QMainWindow):
         self.setLayout(vbox)     
         '''
 
-        """Positioning a label at a specific location"""
-        '''
-        lbl1 = QtGui.QLabel('ZetCode', self)
-        lbl1.move(115, 100)         
-        '''
+        """DISPLAY THE FILE OPENED """
+        #label_file = QtGui.QLabel('Upload the Verilog file', self)
+        #label_file.move(115, 100)         
 
         """Text edit""" 
         '''
@@ -62,7 +61,7 @@ class Example(QtGui.QMainWindow):
         '''
 
         """Defining open file action"""
-        openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
+        openFile = QtGui.QAction(QtGui.QIcon('images/upload.png'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.showDialog)
@@ -74,14 +73,12 @@ class Example(QtGui.QMainWindow):
         exitAction.triggered.connect(QtGui.qApp.quit)
 
         """Adding toolbar"""
+        self.toolbar = self.addToolBar('Load Verilog File')
+        self.toolbar.addAction(openFile)
+
         self.toolbar = self.addToolBar('Exit')
         self.toolbar.addAction(exitAction)
-        '''
-
-        """Don't know what it is?
-        self.statusBar()
-        '''
-
+        
         """Adding menu items"""
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
@@ -205,37 +202,50 @@ class Example(QtGui.QMainWindow):
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         """
         
-        """Drop down menu"""
+        """LABEL"""
         self.lbl = QtGui.QLabel("Select MUT", self)
-
-        combo = QtGui.QComboBox(self)
-        combo.addItem("Select MUT")
-        """
-        combo.addItem("Mandriva")
-        combo.addItem("Fedora")
-        combo.addItem("Red Hat")
-        combo.addItem("Gentoo")
-        
-        for i in range(5):
-            combo.addItem('%d'%(i))
-        """
-        combo.move(50, 250)
         self.lbl.move(50, 150)
+        self.label_file= QtGui.QLabel("Upload Verilog file", self)
+        self.label_file.move(115, 100)
+                
+        """DROP DOWN MENU"""
+        self.combo = QtGui.QComboBox(self)
+        """
+        self.combo.addItem("Select MUT")
+        self.combo.addItem("Mandriva")
+        self.combo.addItem("Fedora")
+        self.combo.addItem("Red Hat")
+        self.combo.addItem("Gentoo")
+        """
         
-        combo.activated[str].connect(self.onActivated)        
+        self.combo.move(50, 250)
         
-        """Setting up the main gui"""
+        self.combo.activated[str].connect(self.onActivated) 
+        #print "%s" %(self.combo.activated[str].connect())
+
+        """EDIT TEXT"""
+        self.le = QtGui.QLineEdit(self)
+        self.le.move(130, 220)
+        #self.le.setText(str(text))
+        self.le.resize(1000,30)
+        
+        """SETTING UP THE MAIN GUI"""
         """This section should be by the end of this function.\
         Otherwise the sections after this will be ignored"""  
-        self.setGeometry(600, 600, 300, 200)
-        self.setWindowTitle('Icon')
+        self.setGeometry(1600, 1600, 1300, 1200)
+        self.setWindowTitle('Slicer')
         self.setWindowIcon(QtGui.QIcon('images/chat.png'))          
         self.show() 
 
     def onActivated(self, text):
         """Display text (selected using drop down menu)"""   
-        self.lbl.setText(text)
-        self.lbl.adjustSize()
+        self.lbl.setText("MUT:"+text)
+        self.label_file.setText(text)
+        print "SLICING DONE,file:%s\nMUT:%s" %(self.fname,text)
+        #slicing_main(self.fname,"u2_half_adder")
+        slicing_main("/run/media/vineeth/FUN/trunk/research/tools/python/pyQt/full_adder.v",toUtf8(text))
+        #self.lbldjustSize()
+        #self.setText(text)
 
     def timerEvent(self, e):
         """Timer for progress bar""" 
@@ -296,18 +306,30 @@ class Example(QtGui.QMainWindow):
             event.ignore()         
     
     def keyPressEvent(self, e):
-       
+        """Close the application on pressing Escape button"""
         if e.key() == QtCore.Qt.Key_Escape:
             self.close()
     
     def showDialog(self):
-    
         """Open file action"""
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file','/home/Documents')        
-        f = open(fname, 'r')
+        mod_list=[]
+        self.fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file','/run/media/vineeth/FUN/trunk/research/tools/python/pyQt/full_adder.v')
+        self.label_file.setText(self.fname)
+        f = open(self.fname, 'r')
+        self.le.setText("You loaded:"+self.fname)
+        #slicing_main(self.fname,"u2_half_adder")
+        mod_list=find_sub_modules(self.fname)
+        #print mod_list
+        for i in range(len(mod_list)):
+            self.le.setText(mod_list[i])
+            self.combo.addItem(mod_list[i])
+        """
         with f:        
             data = f.read()
             #self.textEdit.setText(data)   
+            #self.lbl.setText(data)
+            #self.lbl.adjustSize()
+        """    
     def printText(self):
         self.textEdit.setText("test data")
         
@@ -316,7 +338,7 @@ class Example(QtGui.QMainWindow):
         self.c.closeApp.emit()
         self.statusBar().showMessage('Oops!! Did you just press the mouse button?')
         '''    
-#class FormWidget(QtGui.QWidget):
+#clas FormWidget(QtGui.QWidget):
 class FormWidget(QtGui.QMainWindow):
     def __init__(self):
         super(FormWidget, self).__init__()
@@ -329,8 +351,8 @@ class FormWidget(QtGui.QMainWindow):
         self.button2 = QPushButton("Button 2")
         self.layout.addWidget(self.button2)
         self.setLayout(self.layout)
-        '''
         self.statusBar().showMessage('Oops!! Did you just press the mouse button?')
+        '''
 def main():
     app = QtGui.QApplication(sys.argv)
     ex = Example()
