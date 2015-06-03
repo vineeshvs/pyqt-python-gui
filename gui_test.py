@@ -61,17 +61,17 @@ class Example(QtGui.QMainWindow):
         self.setCentralWidget(textEdit)            
         '''
 
-        """Defining exit action"""
-        exitAction = QtGui.QAction(QtGui.QIcon('images/exit.png'), '&Exit', self)        
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(QtGui.qApp.quit)
-
         """Defining open file action"""
         openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.showDialog)
+
+        """Defining exit action"""
+        exitAction = QtGui.QAction(QtGui.QIcon('images/exit.png'), '&Exit', self)        
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
 
         """Adding toolbar"""
         self.toolbar = self.addToolBar('Exit')
@@ -85,8 +85,8 @@ class Example(QtGui.QMainWindow):
         """Adding menu items"""
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(exitAction)
         fileMenu.addAction(openFile)
+        fileMenu.addAction(exitAction)
 
         """Adding buttons"""
         """
@@ -129,12 +129,15 @@ class Example(QtGui.QMainWindow):
         self.c.closeApp.connect(self.close)
         
         """Checkbox"""
+        """
         cb = QtGui.QCheckBox('Show title', self)
         cb.move(20, 20)
         cb.toggle()
         cb.stateChanged.connect(self.changeTitle)
+        """
 
         """Buttons with color"""
+        """
         self.col = QtGui.QColor(0, 0, 0)       
 
         redb = QtGui.QPushButton('Red', self)
@@ -158,8 +161,10 @@ class Example(QtGui.QMainWindow):
         self.square = QtGui.QFrame(self)
         self.square.setGeometry(500, 200, 100, 100)
         self.square.setStyleSheet("QWidget { background-color: %s }" %self.col.name())
+        """
 
         """Progress bar"""
+        """
         self.pbar = QtGui.QProgressBar(self)
         self.pbar.setGeometry(130, 140, 200, 25)
 
@@ -173,10 +178,12 @@ class Example(QtGui.QMainWindow):
         self.setGeometry(300, 50, 280, 170)
         self.setWindowTitle('QtGui.QProgressBar')
         self.show()
+        """
 
         """Split the gui into frames""" 
-        #hbox = QtGui.QHBoxLayout(self)
-
+        """
+        hbox = QtGui.QHBoxLayout(self)
+        
         topleft = QtGui.QFrame(self)
         topleft.setFrameShape(QtGui.QFrame.StyledPanel)
  
@@ -193,19 +200,42 @@ class Example(QtGui.QMainWindow):
         splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter2.addWidget(splitter1)
         splitter2.addWidget(bottom)
-        """
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         """
-     
+        
+        """Drop down menu"""
+        self.lbl = QtGui.QLabel("Select MUT", self)
+
+        combo = QtGui.QComboBox(self)
+        combo.addItem("Select MUT")
+        """
+        combo.addItem("Mandriva")
+        combo.addItem("Fedora")
+        combo.addItem("Red Hat")
+        combo.addItem("Gentoo")
+        
+        for i in range(5):
+            combo.addItem('%d'%(i))
+        """
+        combo.move(50, 250)
+        self.lbl.move(50, 150)
+        
+        combo.activated[str].connect(self.onActivated)        
+        
         """Setting up the main gui"""
         """This section should be by the end of this function.\
         Otherwise the sections after this will be ignored"""  
-        self.setGeometry(600, 600, 250, 150)
+        self.setGeometry(600, 600, 300, 200)
         self.setWindowTitle('Icon')
         self.setWindowIcon(QtGui.QIcon('images/chat.png'))          
         self.show() 
+
+    def onActivated(self, text):
+        """Display text (selected using drop down menu)"""   
+        self.lbl.setText(text)
+        self.lbl.adjustSize()
 
     def timerEvent(self, e):
         """Timer for progress bar""" 
